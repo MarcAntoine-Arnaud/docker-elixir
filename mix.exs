@@ -1,17 +1,19 @@
 defmodule Docker.Mixfile do
   use Mix.Project
 
-  @version File.read!("VERSION") |> String.strip
+  @version File.read!("VERSION") |> String.trim
 
   def project do
-    [app: :docker,
-     version: @version,
-     elixir: "~> 1.0",
-     deps: deps,
+    [
+      app: :docker,
+      version: @version,
+      elixir: "~> 1.0",
+      deps: deps(),
 
-     # Hex
-     description: description,
-     package: package]
+      # Hex
+      description: description(),
+      package: package()
+    ]
   end
 
   def application do
@@ -20,10 +22,10 @@ defmodule Docker.Mixfile do
 
   defp deps do
     [
-      {:poison, "~> 1.2"},
+      {:poison, "~> 3.1"},
       {:httpoison, "~> 0.5"},
-      {:earmark, "~> 0.1", only: :dev},
-      {:ex_doc, "~> 0.7", only: :dev},
+      {:earmark, "~> 1.2", only: :dev},
+      {:ex_doc, "~> 0.18", only: :dev},
     ]
   end
 

@@ -5,8 +5,19 @@ defmodule Docker.Client do
     host = Application.get_env(:docker, :host) || System.get_env("DOCKER_HOST")
     version = Application.get_env(:docker, :version)
     "#{host}/#{version}"
-    |> String.replace("tcp://", "http://")
+    |> String.replace("tcp://", "https://")
     |> String.rstrip(?/)
+  end
+
+  defp options do
+    cert_path = Application.get_env(:docker, :cert_path) || System.get_env("DOCKER_CERT_PATH")
+    [
+      ssl: [
+        certfile: cert_path <> "/cert.pem",
+        keyfile: cert_path <> "/key.pem",
+        cacertfile: cert_path <> "/ca.pem",
+      ]
+    ]
   end
 
   @default_headers %{"Content-Type" => "application/json"}
@@ -16,8 +27,8 @@ defmodule Docker.Client do
   """
   def get(resource, headers \\ @default_headers) do
     Logger.debug "Sending GET request to the Docker HTTP API: #{resource}"
-    base_url <> resource
-    |> HTTPoison.get!(headers)
+    base_url() <> resource
+    |> HTTPoison.get!(headers, options())
     |> decode_body
   end
 
@@ -27,8 +38,9 @@ defmodule Docker.Client do
   def post(resource, data \\ "", headers \\ @default_headers) do
     Logger.debug "Sending POST request to the Docker HTTP API: #{resource}, #{inspect data}"
     data = Poison.encode! data
-    base_url <> resource
-    |> HTTPoison.post!(data, headers)
+
+    base_url() <> resource
+    |> HTTPoison.post!(data, headers, options())
     |> decode_body
   end
 
@@ -37,8 +49,8 @@ defmodule Docker.Client do
   """
   def delete(resource, headers \\ @default_headers) do
     Logger.debug "Sending DELETE request to the Docker HTTP API: #{resource}"
-    base_url <> resource
-    |> HTTPoison.delete!(headers)
+    base_url() <> resource
+    |> HTTPoison.delete!(headers, options())
   end
 
   defp decode_body(%HTTPoison.Response{body: ""}) do
