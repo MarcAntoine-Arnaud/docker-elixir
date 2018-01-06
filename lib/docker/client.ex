@@ -16,7 +16,8 @@ defmodule Docker.Client do
         certfile: cert_path <> "/cert.pem",
         keyfile: cert_path <> "/key.pem",
         cacertfile: cert_path <> "/ca.pem",
-      ]
+      ],
+      timeout: 60000
     ]
   end
 
